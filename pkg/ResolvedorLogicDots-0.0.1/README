@@ -1,0 +1,5 @@
+== ResolvedorLogicDots
+
+Resolvedor para o jogo logicdots do android.
+Você precisa desenhar o tabuleiro inicial e o programa vai mostrar uma possível 
+solução (ou deveria).
