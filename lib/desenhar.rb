@@ -3,11 +3,11 @@ module Desenhar
   attr_accessor :cor, :window, :fonte
 
   def linha x1, y1, x2, y2
-    Gosu::draw_line(x1, y1, @cor, x2, y2, @cor, 1)
+    Gosu::draw_line(x1, y1, @cor, x2, y2, @cor, 2)
   end
   
   def ret x, y, l, a
-    Gosu::draw_rect(x, y, l, a, @cor, 1)
+    Gosu::draw_rect(x, y, l, a, @cor, 2)
   end
   
   def texto txt, x, y, tam
