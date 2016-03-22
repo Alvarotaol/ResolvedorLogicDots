@@ -72,6 +72,8 @@ class Principal < Window
     case id
     when KbEscape
       close
+    when KbSpace
+      @tab.converter
     when MsLeft
       testar.call(:incre)
     when MsRight
