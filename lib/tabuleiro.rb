@@ -124,7 +124,7 @@ class Tabuleiro
       end
       m[i][j] = p
     end
-    p m
+    #p m
     m.each_index do |i|
       m[i].each_index do |j|
         if m[i][j] == @mapa[:cima] or m[i][j] == @mapa[:vert]

@@ -12,7 +12,12 @@ module Desenhar
   
   def texto txt, x, y, tam
     #fonte = Gosu::Font.new(@window, Gosu::default_font_name, tam)
-    fonte.draw(txt, x, y, 2, 1, 1, @cor)
+    dy = y
+    txt.split("\n").each() do |t|
+      fonte.draw(t, x, dy, 2, 1, 1, @cor)
+      dy += fonte.height
+    end
+    
     
   end
 end
