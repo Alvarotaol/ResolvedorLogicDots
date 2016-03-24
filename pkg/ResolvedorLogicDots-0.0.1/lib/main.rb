@@ -1,6 +1,7 @@
 require 'gosu'
 require_relative 'tabuleiro'
 require_relative 'botao'
+require_relative 'algoritmo/resolver'
 
 include Gosu
 
@@ -138,5 +139,18 @@ class Principal < Window
 end
 
 
-janela = Principal.new
-janela.show
+#janela = Principal.new
+#janela.show
+
+
+matriz = [[:indef, :indef, :indef, :pont, :indef],
+          [:indef, :indef, :indef, :indef, :indef],
+          [:indef, :pont, :indef, :indef, :indef],
+          [:indef, :indef, :indef, :vazio, :indef],
+          [:indef, :indef, :indef, :pont, :indef]]
+hori = [2, 1, 3, 1, 1]
+vert = [0, 3, 0, 3, 2]
+barra = [3, 2, 2, 1]
+res = Resolver.new(matriz, hori, vert, barra)
+res.resolver()
+p res.matriz
