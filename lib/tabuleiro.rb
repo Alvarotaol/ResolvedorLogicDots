@@ -149,7 +149,12 @@ class Tabuleiro
         
       end
     end
+    @m = m
     m
+  end
+  
+  def matriz
+    @m
   end
   
   def draw

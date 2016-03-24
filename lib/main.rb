@@ -25,8 +25,31 @@ class Principal < Window
     
     @tab.pontos = Gosu::Image::load_tiles(self, "../assets/pontos.png", 25, 25, false)
     
+    
+    
     Desenhar::window = self
     Desenhar::fonte = Gosu::Font.new(self, Gosu::default_font_name, 20)
+    ler_arquivo
+  end
+  
+  def ler_arquivo
+    a = File.new("ult.lgc", "r")
+    l = a.readline
+    m = []
+    m[0] = l.split(" ").map { |i| i.to_sym}
+    t = m[0].size
+    1.upto(t-1) { |i| m[i] = a.readline.split(" ").map { |i| i.to_sym } }
+    h = a.readline.split(" ").map { |i| i.to_i }
+    v = a.readline.split(" ").map { |i| i.to_i }
+    b = a.readline.split(" ").map { |i| i.to_i }
+  end
+  
+  def gravar_arquivo
+    a = File.new("ult.lgc", "w")
+    @tab.matriz.each { |i| a.write(i.join(" ")+"\n") }
+    a.write(n_hori.join(" ")+"\n")
+    a.write(n_vert.join(" ")+"\n")
+    a.write(n_barras.join(" ")+"\n")
   end
   
   def update
@@ -85,9 +108,9 @@ class Principal < Window
     when KbSpace
       if self.text_input.nil?
         @tab.converter
-        p n_hori
-        p n_vert
-        p n_barras
+        gravar_arquivo
+        @resolver = Resolver.new @tab.converter, n_hori, n_vert, n_barras
+        @resolver.resolver()
       end
     when KbReturn
       @tinput.text += "\n" unless self.text_input.nil?
@@ -139,18 +162,18 @@ class Principal < Window
 end
 
 
-#janela = Principal.new
-#janela.show
+janela = Principal.new
+janela.show
 
 
-matriz = [[:indef, :indef, :indef, :pont, :indef],
-          [:indef, :indef, :indef, :indef, :indef],
-          [:indef, :pont, :indef, :indef, :indef],
-          [:indef, :indef, :indef, :vazio, :indef],
-          [:indef, :indef, :indef, :pont, :indef]]
-hori = [2, 1, 3, 1, 1]
-vert = [0, 3, 0, 3, 2]
-barra = [3, 2, 2, 1]
-res = Resolver.new(matriz, hori, vert, barra)
-res.resolver()
-p res.matriz
+#matriz = [[:indef, :indef, :indef, :pont, :indef],
+#          [:indef, :indef, :indef, :indef, :indef],
+#          [:indef, :pont, :indef, :indef, :indef],
+#          [:indef, :indef, :indef, :vazio, :indef],
+#          [:indef, :indef, :indef, :indef, :indef]]
+#hori = [2, 1, 3, 1, 1]
+#vert = [0, 3, 0, 3, 2]
+#barra = [3, 2, 2, 1]
+#res = Resolver.new(matriz, hori, vert, barra)
+#res.resolver()
+#p res.matriz

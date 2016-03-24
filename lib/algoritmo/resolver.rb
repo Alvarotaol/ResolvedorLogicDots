@@ -61,10 +61,14 @@ class Resolver
     if @matriz[i][j] == :indef
       if nivel == 0
         @matriz[i][j] = :pont
+        @matriz[i-1][j-1] = :vazio if i > 0 and j > 0
+        @matriz[i-1][j+1] = :vazio if i > 0 and j < @t - 1
+        @matriz[i+1][j-1] = :vazio if i < @t - 1 and j > 0
+        @matriz[i+1][j+1] = :vazio if i < @t - 1 and j < @t - 1
       else
         @matriz[i][j] = nivel
       end
-      true
+      return true
     end
     false
   end
@@ -76,7 +80,7 @@ class Resolver
       else
         @matriz[i][j] = -nivel
       end
-      true
+      return true
     end
     false
   end
