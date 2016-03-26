@@ -13,6 +13,7 @@ class Resolver
       
       
     end
+    @matriz.each { |i| p i }
   end
   
   def horizontal nivel

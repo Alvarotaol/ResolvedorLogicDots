@@ -30,6 +30,7 @@ class Principal < Window
     Desenhar::window = self
     Desenhar::fonte = Gosu::Font.new(self, Gosu::default_font_name, 20)
     ler_arquivo
+    
   end
   
   def ler_arquivo
@@ -42,6 +43,9 @@ class Principal < Window
     h = a.readline.split(" ").map { |i| i.to_i }
     v = a.readline.split(" ").map { |i| i.to_i }
     b = a.readline.split(" ").map { |i| i.to_i }
+    
+    @resolver = Resolver.new m, h, v, b
+    @resolver.resolver()
   end
   
   def gravar_arquivo
