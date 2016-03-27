@@ -50,6 +50,17 @@ class Tabuleiro
   attr_reader :matriz
   attr_accessor :tcasa, :pontos
   
+  INDEF = 0x0
+  VAZIO = 0x01
+  PONT = 0x02
+  CIMA = 0x04
+  DIR = 0x08
+  BAIXO = 0x10
+  ESQ = 0x20
+  VERT = CIMA + BAIXO
+  HORI = DIR + ESQ
+  LIVRE = 0x40
+  
   def initialize(x,y, t=5)
     @mapa = {indef: 0, vazio: 1, pont: 2, cima: 3,
             dire: 4, baixo: 5, esq: 6, vert: 7, hori: 8, decre: -1, incre: 1}
@@ -58,13 +69,63 @@ class Tabuleiro
     @y = y
     @t = t
     @tcasa = 20
-    @matriz = Matriz.new t
+    @matriz = [@t]*@t
+    @matriz.map! { |m| [0]*m }
     
   end
   
   def tamanho= t
     @t = t
     @matriz.tamanho = t
+  end
+  
+  #priv
+  def prox m, d
+    if d == :incre
+      case m
+      when INDEF
+        return VAZIO
+      when ESQ
+        return VERT
+      when HORI
+        return INDEF
+      else
+        return m * 2
+      end
+    else
+      case m
+      when INDEF
+        return HORI
+      when VERT
+        return ESQ
+      else
+        return m / 2
+      end
+    end
+  end
+  
+  #priv
+  def simb_hex n
+    case n
+    when :indef
+      return INDEF
+    when :vazio
+      return VAZIO
+    when :pont
+      return PONT
+    when :cima
+      return CIMA
+    when :dir
+      return DIR
+    when :baixo
+      return BAIXO
+    when :esq
+      return ESQ
+    when :vert
+      return VERT
+    when :hori
+      return HORI
+    end
   end
   
   def clicar x, y, d
@@ -74,9 +135,9 @@ class Tabuleiro
     dx /= @tcasa
     dy /= @tcasa
     if(d == :decre or d == :incre)
-      @matriz.ml dy, dx, @mapa[d]
+      @matriz[dy][dx] = prox @matriz[dy][dx], d
     else
-      @matriz.el dy, dx, @mapa[d]
+      @matriz[dy][dx] = simb_hex d
     end
     true
   end
@@ -165,9 +226,45 @@ class Tabuleiro
       Desenhar::linha @x, @y + i*@tcasa, @x + @t*@tcasa, @y + @tcasa*i
     end
     
-    #desenhar pontos
-    @matriz.each! do |i, j, p|
-        @pontos[p-1].draw(@x+j*@tcasa, @y+i*@tcasa,1) if p > 0
+    @matriz.each_index do |i|
+      @matriz[i].each_index do |j|
+        valor = @matriz[i][j]
+        if valor > LIVRE + VAZIO
+          valor += CIMA if i > 0 and @matriz[i-1][j] >= PONT
+          valor += DIR if j < @t-1 and @matriz[i][j+1] >= PONT
+          valor += BAIXO if i > 0 and @matriz[i+1][j] >= PONT
+          valor += ESQ if j < @t-1 and @matriz[i][j-1] >= PONT
+        end
+        draw_cel i, j, valor
+      end
+    end
+  end
+  
+  def draw_cel x, y, v
+    dv = v
+    if dv >= LIVRE
+      dv -= LIVRE
+      cor= 0xffffffff
+    else
+      cor= 0xffaaaaaa
+    end
+    case dv
+    when VAZIO
+      @pontos[0].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+    when PONT
+      @pontos[1].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+    when CIMA
+      @pontos[2].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+    when DIR
+      @pontos[3].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+    when BAIXO
+      @pontos[4].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+    when ESQ
+      @pontos[5].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+    when VERT
+      @pontos[6].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+    when HORI
+      @pontos[7].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
     end
   end
 end
