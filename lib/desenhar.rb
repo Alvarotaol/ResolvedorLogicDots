@@ -10,7 +10,7 @@ module Desenhar
     Gosu::draw_rect(x, y, l, a, @cor, 2)
   end
   
-  def texto txt, x, y, tam
+  def texto txt, x, y
     #fonte = Gosu::Font.new(@window, Gosu::default_font_name, tam)
     dy = y
     txt.split("\n").each() do |t|

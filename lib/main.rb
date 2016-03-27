@@ -29,7 +29,7 @@ class Principal < Window
     
     Desenhar::window = self
     Desenhar::fonte = Gosu::Font.new(self, Gosu::default_font_name, 20)
-    ler_arquivo
+    #ler_arquivo
     
   end
   
@@ -48,9 +48,9 @@ class Principal < Window
     @resolver.resolver()
   end
   
-  def gravar_arquivo
+  def gravar_arquivo m
     a = File.new("ult.lgc", "w")
-    @tab.matriz.each { |i| a.write(i.join(" ")+"\n") }
+    m.each { |i| a.write(i.join(" ")+"\n") }
     a.write(n_hori.join(" ")+"\n")
     a.write(n_vert.join(" ")+"\n")
     a.write(n_barras.join(" ")+"\n")
@@ -72,7 +72,7 @@ class Principal < Window
     end
     @botnovo.draw
     @botescr.draw
-    Desenhar::texto(@tinput.text, 370, 70, 20)
+    Desenhar::texto(@tinput.text, 370, 70)
   end
   
   def needs_cursor?
@@ -88,7 +88,7 @@ class Principal < Window
       elsif(button_down? KbA)
         @tab.clicar(mouse_x, mouse_y, :esq)
       elsif(button_down? KbD)
-        @tab.clicar(mouse_x, mouse_y, :dire)
+        @tab.clicar(mouse_x, mouse_y, :dir)
       elsif(button_down? KbS)
         @tab.clicar(mouse_x, mouse_y, :pont)
       elsif(button_down? KbQ)
@@ -108,12 +108,17 @@ class Principal < Window
     
     case id
     when KbEscape
-      close
+      if(self.text_input.nil?)
+        close
+      else
+        self.text_input = nil
+        @botescr.txt = "Escrever"
+      end
     when KbSpace
       if self.text_input.nil?
-        @tab.converter
-        gravar_arquivo
-        @resolver = Resolver.new @tab.converter, n_hori, n_vert, n_barras
+        m = @tab.converter
+        gravar_arquivo m
+        @resolver = Resolver.new m, n_hori, n_vert, n_barras
         @resolver.resolver()
       end
     when KbReturn
@@ -152,7 +157,7 @@ class Principal < Window
   end
   
   def n_hori
-    @tinput.text.split("\n")[0].split(' ').map { |l| l.to_i }
+    @tinput.text.split("\n")[0].split(' ').map { |l| l.to_i } 
   end
   
   def n_vert

@@ -1,51 +1,6 @@
 require_relative 'desenhar'
 include Desenhar
 
-       
-class Matriz
-  def initialize t
-    @t = t
-    @m = [t]*t
-    @m.map! { |m| [0]*m }
-  end
-  
-  def tamanho= t
-    @t = t
-    @m = [t]*t
-    @m.map! { |m| [0]*m }
-  end
-  
-  def el x, y, e
-    unless x < 0 or y < 0 or x >= @t or y >= @t
-      @m[x][y] = e
-      e
-    else
-      nil
-    end
-  end
-  
-  def arel ar, v
-    ar.each do |i|
-      el i[0], i[1], v
-    end
-  end
-  
-  def ml x, y, e
-    unless x < 0 or y < 0 or x >= @t or y >= @t
-      @m[x][y] += e
-      @m[x][y] %= 9
-    end
-    @m[x][y]
-  end
-  
-  def each! 
-    0.upto(@t-1) do |i|
-      0.upto(@t-1) do |j|
-        yield(i,j,@m[i][j])
-      end
-    end
-  end
-end
 class Tabuleiro
   attr_reader :matriz
   attr_accessor :tcasa, :pontos
@@ -76,10 +31,67 @@ class Tabuleiro
   
   def tamanho= t
     @t = t
-    @matriz.tamanho = t
+    @matriz = [@t]*@t
+    @matriz.map! { |m| [0]*m }
   end
   
-  #priv
+  def clicar x, y, d
+    dx = x - @x
+    dy = y - @y
+    return false if(dx < 0 or dy < 0 or dx >= @tcasa*@t or dy >= @tcasa*@t)
+    dx /= @tcasa
+    dy /= @tcasa
+    if(d == :decre or d == :incre)
+      @matriz[dy][dx] = prox @matriz[dy][dx], d
+    else
+      @matriz[dy][dx] = simb_hex d
+    end
+    true
+  end
+  
+  def converter
+    m=[]
+    completar
+    @matriz.each do |i|
+      m.push([])
+      i.each() do |j|
+        case j
+        when INDEF
+          m[-1].push(:indef)
+        when VAZIO, VAZIO+LIVRE
+          m[-1].push(:vazio)
+        else
+          m[-1].push(:pont)
+        end
+      end
+    end
+    m
+  end
+  
+  def draw
+    #desenhar tabuleiro
+    Desenhar::cor= 0xff0000ff
+    0.upto(@t) do |i|
+      Desenhar::linha @x + i*@tcasa, @y, @x + @tcasa*i, @y + @t*@tcasa
+      Desenhar::linha @x, @y + i*@tcasa, @x + @t*@tcasa, @y + @tcasa*i
+    end
+    #desenhar células
+    @matriz.each_index do |i|
+      @matriz[i].each_index do |j|
+        valor = @matriz[i][j]
+        if valor == LIVRE
+          valor += CIMA if i > 0 and @matriz[i-1][j].between?(PONT, LIVRE)
+          valor += DIR if j < @t-1 and @matriz[i][j+1].between?(PONT, LIVRE)
+          valor += BAIXO if i < @t-1 and @matriz[i+1][j].between?(PONT, LIVRE)
+          valor += ESQ if j > 0 and @matriz[i][j-1].between?(PONT, LIVRE)
+        end
+        draw_cel i, j, valor
+      end
+    end
+  end
+  
+  private
+  
   def prox m, d
     if d == :incre
       case m
@@ -104,7 +116,6 @@ class Tabuleiro
     end
   end
   
-  #priv
   def simb_hex n
     case n
     when :indef
@@ -128,116 +139,39 @@ class Tabuleiro
     end
   end
   
-  def clicar x, y, d
-    dx = x - @x
-    dy = y - @y
-    return false if(dx < 0 or dy < 0 or dx >= @tcasa*@t or dy >= @tcasa*@t)
-    dx /= @tcasa
-    dy /= @tcasa
-    if(d == :decre or d == :incre)
-      @matriz[dy][dx] = prox @matriz[dy][dx], d
-    else
-      @matriz[dy][dx] = simb_hex d
+  def preencher_redor x, y
+    p = @matriz[x][y]
+    if p.between?(PONT, LIVRE)
+      @matriz[x-1][y-1] = VAZIO + LIVRE if x>0 and y>0 and disp? @matriz[x-1][y-1]
+      @matriz[x-1][y+1] = VAZIO + LIVRE if x>0 and y<@t-1 and disp? @matriz[x-1][y+1]
+      @matriz[x+1][y-1] = VAZIO + LIVRE if x<@t-1 and y>0 and disp? @matriz[x+1][y-1]
+      @matriz[x+1][y+1] = VAZIO + LIVRE if x<@t-1 and y<@t-1 and disp? @matriz[x+1][y+1]
+      @matriz[x-1][y] = VAZIO + LIVRE if x>0 and [BAIXO,PONT].include?(p) and disp? @matriz[x-1][y]
+      @matriz[x][y-1] = VAZIO + LIVRE if y>0 and [DIR,PONT].include?(p) and disp? @matriz[x][y-1]
+      @matriz[x][y+1] = VAZIO + LIVRE if y<@t-1 and [ESQ,PONT].include?(p) and disp? @matriz[x][y+1]
+      @matriz[x+1][y] = VAZIO + LIVRE if x<@t-1 and [CIMA,PONT].include?(p) and disp? @matriz[x+1][y]
     end
-    true
   end
   
-  def preencher
-    @matriz.each! do |i,j,p|
-        if p == @mapa[:pont]
-          ar = [[i-1, j-1], [i-1, j], [i-1, j+1],
-                [i, j-1]  ,           [i, j+1],
-                [i+1, j-1], [i+1, j], [i+1, j+1]]
-        elsif p == @mapa[:cima]
-          ar = [[i-1, j-1],           [i-1, j+1],
-                [i, j-1]  ,           [i, j+1],
-                [i+1, j-1], [i+1, j], [i+1, j+1]]
-        elsif p == @mapa[:dire]
-          ar = [[i-1, j-1], [i-1, j], [i-1, j+1],
-                [i, j-1]  ,
-                [i+1, j-1], [i+1, j], [i+1, j+1]]
-        elsif p == @mapa[:baixo]
-          ar = [[i-1, j-1], [i-1, j], [i-1, j+1],
-                [i, j-1]  ,           [i, j+1],
-                [i+1, j-1],           [i+1, j+1]]
-        elsif p == @mapa[:esq]
-          ar = [[i-1, j-1], [i-1, j], [i-1, j+1],
-                                      [i, j+1],
-                [i+1, j-1], [i+1, j], [i+1, j+1]]
-        elsif p == @mapa[:vert]
-          ar = [[i-1, j-1], [i-1, j+1],
-                [i, j-1]  , [i, j+1],
-                [i+1, j-1], [i+1, j+1]]
-        elsif p == @mapa[:hori]
-          ar = [[i-1, j-1], [i-1, j], [i-1, j+1],
-                [i+1, j-1], [i+1, j], [i+1, j+1]]
-        end
-        @matriz.arel ar, @mapa[:vazio] unless ar == nil
-      end
-  end
-  
-  def converter
-    m=[]
-    preencher
-    @matriz.each! do |i, j, p|
-      if m[i]==nil
-        m[i] = []
-      end
-      m[i][j] = p
-    end
-    #p m
-    m.each_index do |i|
-      m[i].each_index do |j|
-        if m[i][j] == @mapa[:cima] or m[i][j] == @mapa[:vert]
-          m[i-1][j] = :pont
-        end
-        if m[i][j] == @mapa[:dire] or m[i][j] == @mapa[:hori]
-          m[i][j+1] = :pont
-        end
-        if m[i][j] == @mapa[:baixo] or m[i][j] == @mapa[:vert]
-          m[i+1][j] = :pont
-        end
-        if m[i][j] == @mapa[:esq] or m[i][j] == @mapa[:hori]
-          m[i][j-1] = :pont
-        end
-        if m[i][j] == @mapa[:indef]
-          m[i][j] = :indef
-        elsif m[i][j] == @mapa[:vazio]
-          m[i][j] = :vazio
-        else
-          m[i][j] = :pont
-        end
-        
-      end
-    end
-    @m = m
-    m
-  end
-  
-  def matriz
-    @m
-  end
-  
-  def draw
-    #desenhar tabuleiro
-    Desenhar::cor= 0xff0000ff
-    0.upto(@t) do |i|
-      Desenhar::linha @x + i*@tcasa, @y, @x + @tcasa*i, @y + @t*@tcasa
-      Desenhar::linha @x, @y + i*@tcasa, @x + @t*@tcasa, @y + @tcasa*i
-    end
-    
+  def completar
     @matriz.each_index do |i|
       @matriz[i].each_index do |j|
-        valor = @matriz[i][j]
-        if valor > LIVRE + VAZIO
-          valor += CIMA if i > 0 and @matriz[i-1][j] >= PONT
-          valor += DIR if j < @t-1 and @matriz[i][j+1] >= PONT
-          valor += BAIXO if i > 0 and @matriz[i+1][j] >= PONT
-          valor += ESQ if j < @t-1 and @matriz[i][j-1] >= PONT
+        preencher_redor i, j
+        p = @matriz[i][j]
+        if p & CIMA != 0 and i > 0
+          @matriz[i-1][j] = LIVRE
+          preencher_redor i-1, j
         end
-        draw_cel i, j, valor
+        if p & BAIXO != 0 and i < @t-1
+          @matriz[i+1][j] = LIVRE
+          preencher_redor i+1, j
+        end
       end
     end
+  end
+  
+  def disp? p
+    (p == INDEF or p >= LIVRE)
   end
   
   def draw_cel x, y, v
@@ -248,23 +182,26 @@ class Tabuleiro
     else
       cor= 0xffaaaaaa
     end
+    desenho = nil
     case dv
     when VAZIO
-      @pontos[0].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+      desenho = @pontos[0]
     when PONT
-      @pontos[1].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+      desenho = @pontos[1]
     when CIMA
-      @pontos[2].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+     desenho =  @pontos[2]
     when DIR
-      @pontos[3].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+      desenho = @pontos[3]
     when BAIXO
-      @pontos[4].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+      desenho = @pontos[4]
     when ESQ
-      @pontos[5].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+      desenho = @pontos[5]
     when VERT
-      @pontos[6].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+      desenho = @pontos[6]
     when HORI
-      @pontos[7].draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor)
+      desenho = @pontos[7]
     end
+    desenho.draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor) unless desenho.nil?
+    Desenhar.texto dv.to_s, @x+y*@tcasa, @y+x*@tcasa
   end
 end

@@ -18,7 +18,7 @@ class Botao
       Desenhar::cor = 0xff5555ff
       Desenhar::ret @x, @y, @l, @a
       Desenhar::cor = 0xff000000
-      Desenhar::texto @txt, @x, @y, 20
+      Desenhar::texto @txt, @x, @y
     end
   end
 end
