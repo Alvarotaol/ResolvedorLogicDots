@@ -1,8 +1,8 @@
-indef indef indef indef indef
-indef vazio vazio vazio indef
-indef vazio pont vazio indef
-indef vazio vazio vazio indef
-indef indef indef indef indef
-1
-1
-1
+indef vazio indef vazio indef
+pont vazio pont vazio pont
+pont vazio pont vazio pont
+pont vazio pont vazio pont
+indef vazio indef vazio indef
+5 0 5 0 5
+3 3 3 3 3
+5 5 5

@@ -5,6 +5,7 @@ class Resolver
   end
   
   def resolver nivel = 0
+    puts "resolvendo..."
     mod = true
     while mod
       mod = horizontal(nivel) | vertical(nivel)

@@ -68,6 +68,28 @@ class Tabuleiro
     m
   end
   
+  def carregar m
+    self.tamanho = m.length
+    resolver m
+  end
+  
+  def resolver m
+    m.each_index do |i|
+      m[i].each_index do |j|
+        el = nil
+        case m[i][j]
+        when :indef
+          el = INDEF
+        when :vazio
+          el = VAZIO
+        when :pont
+          el = PONT
+        end
+        @matriz[i][j] = el unless @matriz[i][j].between?(VAZIO, LIVRE-1)
+      end
+    end
+  end
+  
   def draw
     #desenhar tabuleiro
     Desenhar::cor= 0xff0000ff
