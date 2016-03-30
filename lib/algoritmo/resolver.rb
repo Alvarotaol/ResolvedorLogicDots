@@ -5,16 +5,15 @@ class Resolver
   end
   
   def resolver nivel = 0
-    puts "resolvendo..."
     mod = true
     while mod
       mod = horizontal(nivel) | vertical(nivel)
       
       
       
-      
     end
     @matriz.each { |i| p i }
+    @matriz
   end
   
   def horizontal nivel
@@ -22,16 +21,16 @@ class Resolver
     @hori.each_index do |i|
         pontos = vazios = 0
         0.upto(@t-1) do |j|
-          vazios += 1 if vazio? @matriz[i][j]
-          pontos += 1 if ponto? @matriz[i][j]
+          vazios += 1 if vazio? @matriz[j][i]
+          pontos += 1 if ponto? @matriz[j][i]
         end
         unless vazios + pontos == @t
-          #A quantidade de espaços disponiveis é a igual à quantidade exigida
+          #A quantidade de espaços disponiveis é igual à quantidade exigida
           if(@hori[i] == @t - vazios)
-            0.upto(@t-1) { |j| mod = mod | pintar(i, j, nivel) }
+            0.upto(@t-1) { |j| mod = mod | pintar(j, i, nivel) }
           end
           if(@hori[i] == pontos)
-            0.upto(@t-1) { |j| mod = mod | vazio!(i, j, nivel) }
+            0.upto(@t-1) { |j| mod = mod | vazio!(j, i, nivel) }
           end
         end
       end
@@ -43,16 +42,16 @@ class Resolver
     @vert.each_index do |i|
       pontos = vazios = 0
       0.upto(@t-1) do |j|
-        vazios += 1 if vazio? @matriz[j][i]
-        pontos += 1 if ponto? @matriz[j][i]
+        vazios += 1 if vazio? @matriz[i][j]
+        pontos += 1 if ponto? @matriz[i][j]
       end
       unless vazios + pontos == @t
-        #A quantidade de espaços disponiveis é a igual à quantidade exigida
+        #A quantidade de espaços disponiveis é igual à quantidade exigida
         if(@vert[i] == @t - vazios)
-          0.upto(@t-1) { |j| mod = mod | pintar(j, i, nivel) }
+          0.upto(@t-1) { |j| mod = mod | pintar(i, j, nivel) }
         end
         if(@vert[i] == pontos)
-          0.upto(@t-1) { |j| mod = mod | vazio!(j, i, nivel) }
+          0.upto(@t-1) { |j| mod = mod | vazio!(i, j, nivel) }
         end
       end
     end

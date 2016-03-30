@@ -40,11 +40,9 @@ class Principal < Window
     m[0] = l.split(" ").map { |i| i.to_sym}
     t = m[0].size
     1.upto(t-1) { |i| m[i] = a.readline.split(" ").map { |i| i.to_sym } }
-    h = a.readline.split(" ").map { |i| i.to_i }
-    v = a.readline.split(" ").map { |i| i.to_i }
-    b = a.readline.split(" ").map { |i| i.to_i }
     
     @tab.carregar(m);
+    @tinput.text = a.readline + a.readline + a.readline
     
   end
   
@@ -119,7 +117,7 @@ class Principal < Window
         m = @tab.converter
         gravar_arquivo m
         @resolver = Resolver.new m, n_hori, n_vert, n_barras
-        @resolver.resolver()
+        @tab.resposta(@resolver.resolver())
       end
     when KbReturn
       @tinput.text += "\n" unless self.text_input.nil?

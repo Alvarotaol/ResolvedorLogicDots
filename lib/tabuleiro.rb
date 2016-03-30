@@ -70,10 +70,10 @@ class Tabuleiro
   
   def carregar m
     self.tamanho = m.length
-    resolver m
+    resposta m
   end
   
-  def resolver m
+  def resposta m
     m.each_index do |i|
       m[i].each_index do |j|
         el = nil
@@ -83,7 +83,7 @@ class Tabuleiro
         when :vazio
           el = VAZIO
         when :pont
-          el = PONT
+          el = LIVRE
         end
         @matriz[i][j] = el unless @matriz[i][j].between?(VAZIO, LIVRE-1)
       end
@@ -188,6 +188,14 @@ class Tabuleiro
           @matriz[i+1][j] = LIVRE
           preencher_redor i+1, j
         end
+        if p & DIR != 0 and j < @t-1
+          @matriz[i][j+1] = LIVRE
+          preencher_redor i, j+1
+        end
+        if p & ESQ != 0 and j > 0
+          @matriz[i][j-1] = LIVRE
+          preencher_redor i, j-1
+        end
       end
     end
   end
@@ -224,6 +232,6 @@ class Tabuleiro
       desenho = @pontos[7]
     end
     desenho.draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor) unless desenho.nil?
-    Desenhar.texto dv.to_s, @x+y*@tcasa, @y+x*@tcasa
+    #Desenhar.texto dv.to_s, @x+y*@tcasa, @y+x*@tcasa
   end
 end
