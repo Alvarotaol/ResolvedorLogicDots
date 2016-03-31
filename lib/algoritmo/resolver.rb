@@ -1,3 +1,39 @@
+class Tern
+  @@v = @@f = @@x = 1
+  def initialize sim
+    @valor = sim
+  end
+  
+  def + (sim)
+    return @@x if @valor == :x
+    return self if sim == @@f
+    sim
+  end
+  
+  def self.v
+    @@v = Tern.new :v if @@v == 1
+    @@v
+  end
+  
+  def self.f
+    @@f = Tern.new :f if @@f == 1
+    @@f
+  end
+  
+  def self.x
+    @@x = Tern.new :x if @@x == 1
+    @@x
+  end
+  
+  def to_s
+    @valor.to_s
+  end
+  
+  def to_b
+    @valor == :v
+  end
+end
+
 class Resolver
   def initialize matriz, hori, vert, barra
     @matriz, @hori, @vert, @barra = matriz, hori, vert, barra
@@ -5,9 +41,9 @@ class Resolver
   end
   
   def resolver nivel = 0
-    mod = true
-    while mod
-      mod = horizontal(nivel) | vertical(nivel)
+    mod = Tern.v
+    while mod.to_b
+      mod = horizontal(nivel) + vertical(nivel)
       
       
       
@@ -17,7 +53,7 @@ class Resolver
   end
   
   def horizontal nivel
-    mod = false
+    mod = Tern.f
     @hori.each_index do |i|
         pontos = vazios = 0
         0.upto(@t-1) do |j|
@@ -27,10 +63,10 @@ class Resolver
         unless vazios + pontos == @t
           #A quantidade de espaços disponiveis é igual à quantidade exigida
           if(@hori[i] == @t - vazios)
-            0.upto(@t-1) { |j| mod = mod | pintar(j, i, nivel) }
+            0.upto(@t-1) { |j| mod = mod + pintar(j, i, nivel) }
           end
           if(@hori[i] == pontos)
-            0.upto(@t-1) { |j| mod = mod | vazio!(j, i, nivel) }
+            0.upto(@t-1) { |j| mod = mod + vazio!(j, i, nivel) }
           end
         end
       end
@@ -38,7 +74,7 @@ class Resolver
   end
   
   def vertical nivel
-    mod = false
+    mod = Tern.f
     @vert.each_index do |i|
       pontos = vazios = 0
       0.upto(@t-1) do |j|
@@ -48,10 +84,10 @@ class Resolver
       unless vazios + pontos == @t
         #A quantidade de espaços disponiveis é igual à quantidade exigida
         if(@vert[i] == @t - vazios)
-          0.upto(@t-1) { |j| mod = mod | pintar(i, j, nivel) }
+          0.upto(@t-1) { |j| mod = mod + pintar(i, j, nivel) }
         end
         if(@vert[i] == pontos)
-          0.upto(@t-1) { |j| mod = mod | vazio!(i, j, nivel) }
+          0.upto(@t-1) { |j| mod = mod + vazio!(i, j, nivel) }
         end
       end
     end
@@ -69,9 +105,9 @@ class Resolver
       else
         @matriz[i][j] = nivel
       end
-      return true
+      return Tern.v
     end
-    false
+    Tern.f
   end
   
   def vazio! i, j, nivel
@@ -81,9 +117,9 @@ class Resolver
       else
         @matriz[i][j] = -nivel
       end
-      return true
+      return Tern.v
     end
-    false
+    Tern.f
   end
   
   def vazio? n
