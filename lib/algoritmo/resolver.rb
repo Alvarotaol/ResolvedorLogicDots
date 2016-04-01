@@ -44,9 +44,24 @@ class Resolver
     if exato(0) == Tern.x
       puts "Deu erro"
     end
+    @matriz.each { |i| p i }
     chutar 1
+    normalizar
     @matriz.each { |i| p i }
     @matriz
+  end
+  
+  def normalizar
+    
+    @matriz.each do |i|
+      i.map! do |x|
+        if x.class == Fixnum
+          x > 0 ? :pont : :vazio
+        else
+          x
+        end
+      end
+    end
   end
   
   def exato nivel
@@ -58,15 +73,35 @@ class Resolver
     end
   end
   
+  def desfazer nivel
+    @matriz.each do |i|
+      i.map! do |x|
+        if x.class == Fixnum
+          (x.abs < nivel) ? x : :indef
+        else
+          x
+        end
+      end
+    end
+  end
+  
   def chutar nivel
     @matriz.each_index() do |i|
       @matriz[i].each_index do |j|
         if @matriz[i][j] == :indef
+          puts "chute #{i}, #{j} "
           res = pintar i, j, nivel
           if res == Tern.x
+            puts "ponto perto"
             despintar i, j, nivel
+            vazio!(i, j, nivel-1)
           else
-            puts exato nivel
+            res2 = exato nivel
+            if res2 == Tern.x
+              desfazer nivel
+              vazio!(i, j, nivel-1)
+            else
+            end
           end
         end
       end
@@ -119,7 +154,7 @@ class Resolver
   
   def pintar i, j, nivel
     if @matriz[i][j] == :indef
-      @matriz[i][j] = nivel == 0 ? :pont : nivel
+      @matriz[i][j] = (nivel == 0 ? :pont : nivel)
       result = vazio!(i-1, j-1, nivel) +
                vazio!(i-1, j+1, nivel) +
                vazio!(i+1, j-1, nivel) +
@@ -140,7 +175,6 @@ class Resolver
   def vazio! i, j, nivel
     return Tern.f unless i.between?(0, @t-1) and j.between?(0, @t-1)
     return Tern.x unless @matriz[i][j] == :indef or vazio? @matriz[i][j]
-    #obs: não atribuir o caso else se o valor atual for maior (menos negativo) que o novo
     return Tern.f if @matriz[i][j] == :vazio or @matriz[i][j]
     if nivel == 0
       @matriz[i][j] = :vazio
