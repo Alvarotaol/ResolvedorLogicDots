@@ -41,7 +41,7 @@ class Resolver
   end
   
   def resolver
-    if exato(0) == Tern.x
+    if exato(1) == Tern.x
       puts "Deu erro"
     end
     @matriz.each { |i| p i }
@@ -51,14 +51,14 @@ class Resolver
     @matriz
   end
   
+  #Trasforma todos os números positivos em 1 e os negativos em -1
   def normalizar
-    
     @matriz.each do |i|
       i.map! do |x|
-        if x.class == Fixnum
-          x > 0 ? :pont : :vazio
-        else
+        if x == 0
           x
+        else
+          x/x.abs
         end
       end
     end
@@ -76,11 +76,7 @@ class Resolver
   def desfazer nivel
     @matriz.each do |i|
       i.map! do |x|
-        if x.class == Fixnum
-          (x.abs < nivel) ? x : :indef
-        else
-          x
-        end
+        (x.abs < nivel) ? x : 0
       end
     end
   end
@@ -88,20 +84,14 @@ class Resolver
   def chutar nivel
     @matriz.each_index() do |i|
       @matriz[i].each_index do |j|
-        if @matriz[i][j] == :indef
+        if pintavel? i, j
           puts "chute #{i}, #{j} "
-          res = pintar i, j, nivel
+          @matriz[i][j] = nivel
+          res = exato nivel
           if res == Tern.x
-            puts "ponto perto"
-            despintar i, j, nivel
-            vazio!(i, j, nivel-1)
+            desfazer nivel
+            @matriz[i][j] = -(nivel-1)
           else
-            res2 = exato nivel
-            if res2 == Tern.x
-              desfazer nivel
-              vazio!(i, j, nivel-1)
-            else
-            end
           end
         end
       end
@@ -113,17 +103,17 @@ class Resolver
     @hori.each_index do |i|
       pontos = vazios = 0
       0.upto(@t-1) do |j|
-        vazios += 1 if vazio? @matriz[j][i]
-        pontos += 1 if ponto? @matriz[j][i]
+        vazios += 1 if @matriz[j][i] < 0
+        pontos += 1 if @matriz[j][i] > 0
       end
       return Tern.x if (@hori[i] < pontos or @t-@hori[i] < vazios)
       unless vazios + pontos == @t
         #A quantidade de espaços disponiveis é igual à quantidade exigida
         if(@hori[i] == @t - vazios)
-          0.upto(@t-1) { |j| mod = mod + pintar(j, i, nivel) if @matriz[j][i] == :indef }
+          0.upto(@t-1) { |j| mod = mod + pintar(j, i, nivel) if @matriz[j][i] == 0 }
         end
         if(@hori[i] == pontos)
-          0.upto(@t-1) { |j| mod = mod + vazio!(j, i, nivel) if @matriz[j][i] == :indef }
+          0.upto(@t-1) { |j| mod = mod + vazio!(j, i, nivel) if @matriz[j][i] == 0 }
         end
       end
     end
@@ -135,17 +125,17 @@ class Resolver
     @vert.each_index do |i|
       pontos = vazios = 0
       0.upto(@t-1) do |j|
-        vazios += 1 if vazio? @matriz[i][j]
-        pontos += 1 if ponto? @matriz[i][j]
+        vazios += 1 if @matriz[i][j] < 0
+        pontos += 1 if @matriz[i][j] > 0
       end
       return Tern.x if (@vert[i] < pontos or @t-@vert[i] < vazios)
       unless vazios + pontos == @t
         #A quantidade de espaços disponiveis é igual à quantidade exigida
         if(@vert[i] == @t - vazios)
-          0.upto(@t-1) { |j| mod = mod + pintar(i, j, nivel) if @matriz[i][j] == :indef }
+          0.upto(@t-1) { |j| mod = mod + pintar(i, j, nivel) if @matriz[i][j] == 0 }
         end
         if(@vert[i] == pontos)
-          0.upto(@t-1) { |j| mod = mod + vazio!(i, j, nivel) if @matriz[i][j] == :indef }
+          0.upto(@t-1) { |j| mod = mod + vazio!(i, j, nivel) if @matriz[i][j] == 0 }
         end
       end
     end
@@ -153,8 +143,8 @@ class Resolver
   end
   
   def pintar i, j, nivel
-    if @matriz[i][j] == :indef
-      @matriz[i][j] = (nivel == 0 ? :pont : nivel)
+    if @matriz[i][j] == 0
+      @matriz[i][j] = nivel
       result = vazio!(i-1, j-1, nivel) +
                vazio!(i-1, j+1, nivel) +
                vazio!(i+1, j-1, nivel) +
@@ -164,34 +154,24 @@ class Resolver
     Tern.f
   end
   
-  def despintar i, j, nivel
-    @matriz[i][j] = :indef
-    @matriz[i-1][j-1] = :indef if i>0 and j>0 and @matriz[i-1][j-1] == -nivel
-    @matriz[i-1][j+1] = :indef if i>0 and j<@t-1 and @matriz[i-1][j+1] == -nivel
-    @matriz[i+1][j-1] = :indef if i<@t-1 and j>0 and @matriz[i+1][j-1] == -nivel
-    @matriz[i+1][j+1] = :indef if i<@t-1 and j<@t-1 and @matriz[i+1][j+1] == -nivel
+  #retorna false se alguma casa na diagonal já estiver pintada, true caso contrário
+  def pintavel? i, j
+    return false if i>0 and j>0 and @matriz[i-1][j-1] > 0
+    return false if i>0 and j<@t-1 and @matriz[i-1][j+1] > 0
+    return false if i<@t-1 and j>0 and @matriz[i+1][j-1] > 0
+    return false if i<@t-1 and j<@t-1 and @matriz[i+1][j+1] > 0
+    @matriz[i][j] == 0
   end
   
+  #Tenta pintar uma casa de com vazio
+  #retorna erro se a casa contém um ponto
+  #retorna v ou f caso tenha ocorrido a modificação ou não
   def vazio! i, j, nivel
-    return Tern.f unless i.between?(0, @t-1) and j.between?(0, @t-1)
-    return Tern.x unless @matriz[i][j] == :indef or vazio? @matriz[i][j]
-    return Tern.f if @matriz[i][j] == :vazio or @matriz[i][j]
-    if nivel == 0
-      @matriz[i][j] = :vazio
-    else
-      @matriz[i][j] = -nivel if @matriz == :indef or @matriz[i][j] > -nivel
-    end
+    return Tern.f unless i.between?(0, @t-1) and j.between?(0, @t-1) #fora da matriz
+    return Tern.x if @matriz[i][j] > 0 #casa contém ponto ponto
+    return Tern.f if @matriz[i][j] < 0 #já estava vazia
+    @matriz[i][j] = -nivel
     return Tern.v
-  end
-  
-  def vazio? n
-    return true if n == :vazio
-    return n < 0 if n.class == Fixnum
-  end
-  
-  def ponto? n
-    return true if n == :pont
-    return n > 0 if n.class == Fixnum
   end
   
   def matriz

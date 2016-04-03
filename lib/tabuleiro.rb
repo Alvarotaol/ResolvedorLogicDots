@@ -57,11 +57,11 @@ class Tabuleiro
       i.each() do |j|
         case j
         when INDEF
-          m[-1].push(:indef)
+          m[-1].push(0)
         when VAZIO, VAZIO+LIVRE
-          m[-1].push(:vazio)
+          m[-1].push(-1)
         else
-          m[-1].push(:pont)
+          m[-1].push(1)
         end
       end
     end
@@ -78,11 +78,11 @@ class Tabuleiro
       m[i].each_index do |j|
         el = nil
         case m[i][j]
-        when :indef
+        when 0
           el = INDEF
-        when :vazio
+        when -1
           el = VAZIO
-        when :pont
+        when 1
           el = LIVRE
         end
         @matriz[i][j] = el unless @matriz[i][j].between?(VAZIO, LIVRE-1)

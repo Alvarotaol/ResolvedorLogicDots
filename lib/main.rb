@@ -37,10 +37,10 @@ class Principal < Window
     a = File.new("ult.lgc", "r")
     l = a.readline
     m = []
-    m[0] = l.split(" ").map { |i| i.to_sym}
+    m[0] = l.split(" ").map { |i| i.to_i}
     t = m[0].size
-    1.upto(t-1) { |i| m[i] = a.readline.split(" ").map { |i| i.to_sym } }
-    
+    1.upto(t-1) { |i| m[i] = a.readline.split(" ").map { |i| i.to_i } }
+    p m
     @tab.carregar(m);
     @tinput.text = a.readline + a.readline + a.readline
     
@@ -115,7 +115,7 @@ class Principal < Window
     when KbSpace
       if self.text_input.nil?
         m = @tab.converter
-        gravar_arquivo m
+        #gravar_arquivo m
         @resolver = Resolver.new m, n_hori, n_vert, n_barras
         @tab.resposta(@resolver.resolver())
       end
