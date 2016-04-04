@@ -44,8 +44,7 @@ class Resolver
     if exato(1) == Tern.x
       puts "Deu erro"
     end
-    @matriz.each { |i| p i }
-    chutar 1
+    #chutar 1
     normalizar
     @matriz.each { |i| p i }
     @matriz
@@ -65,12 +64,41 @@ class Resolver
   end
   
   def exato nivel
+    return Tern.x if checar_barras == Tern.x and nivel > 1
     mod = Tern.v
     while mod.to_b
       mod = horizontal(nivel) + vertical(nivel)
       return Tern.x if mod == Tern.x
-      #chutar nivel + 1
+      chutar nivel + 1
     end
+  end
+  
+  #Variável para controloar se o anterior 
+  def checar_barras
+    bar = [@t]*@t
+    bar.map! { |m| [0]*m }
+    @matriz.each_index do |i|
+      h = false
+      @matriz[i].each_index do |j|
+        if(@matriz[i][j] > 0)
+          if h
+            bar[i][j] = bar[i][j-1] + 1 #havia ponto na esquerda
+          else
+            h = true
+            if i > 0 and bar[i-1][j] > 0
+              bar[i][j] = bar[i-1][j] + 1 #tem ponto acima
+            else
+              bar[i][j] = 1
+            end
+          end
+        else
+          bar[i][j] = 0
+          h = false
+        end
+      end
+    end
+    
+    #agora verificar quais barras eu encontrei
   end
   
   def desfazer nivel
@@ -85,7 +113,7 @@ class Resolver
     @matriz.each_index() do |i|
       @matriz[i].each_index do |j|
         if pintavel? i, j
-          puts "chute #{i}, #{j} "
+          #puts "chute #{i}, #{j} "
           @matriz[i][j] = nivel
           res = exato nivel
           if res == Tern.x

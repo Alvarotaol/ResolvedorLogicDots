@@ -40,7 +40,7 @@ class Principal < Window
     m[0] = l.split(" ").map { |i| i.to_i}
     t = m[0].size
     1.upto(t-1) { |i| m[i] = a.readline.split(" ").map { |i| i.to_i } }
-    p m
+    
     @tab.carregar(m);
     @tinput.text = a.readline + a.readline + a.readline
     
