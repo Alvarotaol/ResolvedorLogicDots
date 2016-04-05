@@ -37,6 +37,7 @@ end
 class Resolver
   def initialize matriz, hori, vert, barra
     @matriz, @hori, @vert, @barra = matriz, hori, vert, barra
+    @barra.sort!.reverse!
     @t = @matriz[0].size
   end
   
@@ -46,7 +47,6 @@ class Resolver
     end
     #chutar 1
     normalizar
-    @matriz.each { |i| p i }
     @matriz
   end
   
@@ -64,16 +64,16 @@ class Resolver
   end
   
   def exato nivel
-    return Tern.x if checar_barras == Tern.x and nivel > 1
     mod = Tern.v
     while mod.to_b
       mod = horizontal(nivel) + vertical(nivel)
       return Tern.x if mod == Tern.x
-      chutar nivel + 1
     end
+    return Tern.x if checar_barras == Tern.x and nivel > 1
+    chutar nivel + 1
   end
   
-  #Variável para controloar se o anterior 
+  #Variável para controlar se o anterior 
   def checar_barras
     bar = [@t]*@t
     bar.map! { |m| [0]*m }
@@ -99,6 +99,36 @@ class Resolver
     end
     
     #agora verificar quais barras eu encontrei
+    nums = [0]*(@t+1)
+    bar.each do |i|
+      i.each do |j|
+        nums[j] += 1
+      end
+    end
+    x = nil
+    nums.reverse!.map! do |i| 
+      if x.nil?
+        x = i
+      else
+        ant = x
+        x = i
+        i - ant
+      end
+    end
+    barras = []
+    nums.pop(1)
+    nums.reverse!
+    nums.each_index do |i|
+      barras += [i+1] * nums[i]
+    end
+    
+    barras.sort!.reverse!
+    barras.each_index do |i|
+      if (not @barra[i].nil?) and barras[i] > @barra[i]
+        return Tern.x
+      end
+    end
+    Tern.v
   end
   
   def desfazer nivel
