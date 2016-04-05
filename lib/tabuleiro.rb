@@ -206,8 +206,11 @@ class Tabuleiro
   
   def draw_cel x, y, v
     dv = v
-    if dv >= LIVRE
+    if dv > LIVRE
       dv -= LIVRE
+      cor= 0xffffffff
+    elsif dv == LIVRE
+      dv = PONT
       cor= 0xffffffff
     else
       cor= 0xffaaaaaa
@@ -232,6 +235,6 @@ class Tabuleiro
       desenho = @pontos[7]
     end
     desenho.draw(@x+y*@tcasa, @y+x*@tcasa,1, 1, 1, cor) unless desenho.nil?
-    #Desenhar.texto dv.to_s, @x+y*@tcasa, @y+x*@tcasa
+    Desenhar.texto dv.to_s, @x+y*@tcasa, @y+x*@tcasa
   end
 end

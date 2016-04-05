@@ -71,6 +71,7 @@ class Principal < Window
     @botnovo.draw
     @botescr.draw
     Desenhar::texto(@tinput.text, 370, 70)
+    
   end
   
   def needs_cursor?
@@ -117,7 +118,8 @@ class Principal < Window
         m = @tab.converter
         #gravar_arquivo m
         @resolver = Resolver.new m, n_hori, n_vert, n_barras
-        @tab.resposta(@resolver.resolver())
+        temp = @resolver.resolver()
+        @tab.resposta(temp)
       end
     when KbReturn
       @tinput.text += "\n" unless self.text_input.nil?
